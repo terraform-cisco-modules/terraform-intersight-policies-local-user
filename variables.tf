@@ -69,7 +69,7 @@ variable "local_user_password_5" {
 }
 
 variable "local_users" {
-  default = []
+  default     = []
   description = <<-EOT
     List of Users to add to the local user policy.
     * enabled - Enables the user account on the endpoint.
@@ -82,7 +82,7 @@ variable "local_users" {
       enabled  = optional(bool, true)
       password = optional(number, 1)
       role     = optional(string, "admin")
-      user = string
+      user     = string
     }
   ))
 }

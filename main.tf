@@ -10,7 +10,7 @@ data "intersight_organization_organization" "org_moid" {
       regexall("[[:xdigit:]]{24}", var.organization)
     ) == 0
   }
-  name     = each.value
+  name = each.value
 }
 
 #____________________________________________________________
@@ -89,15 +89,19 @@ resource "intersight_iam_end_point_user_policy" "local_user" {
 # GUI Location: Policies > Create Policy > Local User > Add New User
 #____________________________________________________________________
 
+locals {
+  roles = toset([for v in var.local_users : v.role])
+}
+
 data "intersight_iam_end_point_role" "user_roles" {
-  for_each = { for v in var.users : v.role => v }
-  name = each.value.role
-  type = "IMC"
+  for_each = { for v in local.roles : v => v }
+  name     = each.value
+  type     = "IMC"
 }
 
 resource "intersight_iam_end_point_user" "users" {
   for_each = { for v in var.local_users : v.user => v }
-  name = var.username
+  name     = each.key
   organization {
     moid = length(
       regexall("[[:xdigit:]]{24}", var.organization)
@@ -111,9 +115,9 @@ resource "intersight_iam_end_point_user" "users" {
 resource "intersight_iam_end_point_user_role" "user_role" {
   depends_on = [
     data.intersight_iam_end_point_role.user_roles,
-    intersight_iam_end_point_user.user
+    intersight_iam_end_point_user.users
   ]
-  for_each = { for v in var.local.users : v.user => v }
+  for_each = { for v in var.local_users : v.user => v }
   enabled  = each.value.enabled
   password = length(
     regexall("^1$", each.value.password)
@@ -133,7 +137,7 @@ resource "intersight_iam_end_point_user_role" "user_role" {
     object_type = "iam.EndPointUser"
   }
   end_point_user_policy {
-    moid        = intersight_iam_end_point_user_policy.local_user
+    moid        = intersight_iam_end_point_user_policy.local_user.moid
     object_type = "iam.EndPointUserPolicy"
   }
 }
