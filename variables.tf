@@ -68,7 +68,7 @@ variable "local_user_password_5" {
   type        = string
 }
 
-variable "local_users" {
+variable "users" {
   default     = []
   description = <<-EOT
     List of Users to add to the local user policy.

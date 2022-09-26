@@ -90,7 +90,7 @@ resource "intersight_iam_end_point_user_policy" "local_user" {
 #____________________________________________________________________
 
 locals {
-  roles = toset([for v in var.local_users : v.role])
+  roles = toset([for v in var.users : v.role])
 }
 
 data "intersight_iam_end_point_role" "user_roles" {
@@ -100,7 +100,7 @@ data "intersight_iam_end_point_role" "user_roles" {
 }
 
 resource "intersight_iam_end_point_user" "users" {
-  for_each = { for v in var.local_users : v.user => v }
+  for_each = { for v in var.users : v.user => v }
   name     = each.key
   organization {
     moid = length(
@@ -117,7 +117,7 @@ resource "intersight_iam_end_point_user_role" "user_role" {
     data.intersight_iam_end_point_role.user_roles,
     intersight_iam_end_point_user.users
   ]
-  for_each = { for v in var.local_users : v.user => v }
+  for_each = { for v in var.users : v.user => v }
   enabled  = each.value.enabled
   password = length(
     regexall("^1$", each.value.password)
