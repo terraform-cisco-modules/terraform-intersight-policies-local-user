@@ -1,51 +1,25 @@
-terraform {
-  required_providers {
-    test = {
-      source = "terraform.io/builtin/test"
-    }
-
-    intersight = {
-      source  = "CiscoDevNet/intersight"
-      version = ">=1.0.32"
-    }
-  }
-}
-
 module "main" {
-  source           = "../.."
-  assignment_order = "sequential"
-  description      = "Demo WWPN Pool"
-  id_blocks = [
-    {
-      from = "0:00:00:25:B5:00:00:00"
-      size = 1000
-    }
-  ]
-  name         = "default"
-  organization = "default"
-  pool_purpose = "WWPN"
+  source                = "../.."
+  description           = "${var.name} Local User Policy."
+  name                  = var.name
+  local_user_password_1 = var.local_user_password_1
+  organization          = "terratest"
+  users = [{
+    password = 1
+    role     = "admin"
+    user     = "admin"
+  }]
 }
 
-data "intersight_fcpool_pool" "wwpn_pool" {
-  depends_on = [
-    module.main
-  ]
-  name = "default"
+output "user" {
+  value = module.main.users["admin"]
 }
 
-resource "test_assertions" "wwpn_pool" {
-  component = "wwpn_pool"
+output "user_role" {
+  value = module.main.user_roles["admin"]
+}
 
-  # equal "description" {
-  #   description = "description"
-  #   got         = data.intersight_fcpool_pool.wwpn_pool.description
-  #   want        = "Demo WWPN Pool"
-  # }
-  # 
-  # equal "name" {
-  #   description = "name"
-  #   got         = data.intersight_fcpool_pool.wwpn_pool.name
-  #   want        = "default"
-  # }
-
+variable "local_user_password_1" {
+  sensitive = true
+  type      = string
 }
